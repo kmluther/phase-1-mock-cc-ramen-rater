@@ -1,72 +1,60 @@
 // write your code here
 const ramenAPI = 'http://localhost:3000/ramens';
-const ramenMenu = document.getElementById('ramen-menu');
-const ramenElement = document.getElementById('ramen-detail');
-const addRamenForm = document.getElementById('new-ramen');
-addRamenForm.addEventListener('submit', addNewRamen);
+const ramenMenuDiv = el('ramen-menu');
 
-const headers = {
-    "Content-Type": "application/json",
-    Accept: "application/json"
-};
+el('new-ramen').addEventListener('submit', newRamenHandler);
 
-let ramenCollection = [];
+// const ramenCard = document.getElementById('ramen-detail');
+// const addRamenForm = document.getElementById('new-ramen');
+// addRamenForm.addEventListener('submit', addNewRamen);
+// ramenMenuDiv.addEventListener('click', renderRamens);
+
+// const headers = {
+//     "Content-Type": "application/json",
+//     Accept: "application/json"
+// };
+
+// let ramenCollection = [];
 
 fetch(ramenAPI)
     .then(res => res.json())
-    .then(ramens => {
-        ramenCollection = ramens;
-        renderRamens();
-    });
+    .then(ramens => renderRamens(ramens));
 
-function renderRamens() {
-    ramenElement.innerHTML = '';
-    ramenCollection.forEach(renderRamen);
+function renderRamens(ramens) {
+    ramens.forEach(renderRamen);
 }
 
-function renderMenu() {
-    let ramenImg = document.createElement("img");
-    ramenImg.setAttribute(`"src", ${ramens.image}`);
-    ramenImg.setAttribute("height", 20);
-    document.getElementById('ramen-menu').appendChild(ramenImg);
+function renderRamen(ramen) {
+    const ramenImageElement = document.createElement('img');
+    ramenImageElement.src = ramen.image;
+    ramenMenuDiv.append(ramenImageElement);
+
+    ramenImageElement.addEventListener('click', () => ramenClickHandler(ramen))
 }
 
-function renderRamen(ramens) {
-    // ramenMenuHeader.addEventListener('click', img) {
-    const ramenCard = document.createElement('div');
-    ramenCard.classList.add('ramen-detail');
+function ramenClickHandler(ramen) {
+    el('detail-image').src = ramen.image;
+    el('detail-name').textContent = ramen.name;
+    el('detail-restaurant').textContent = ramen.restaurant;
+    el('rating-display').textContent = ramen.rating;
+    el('comment-display').textContent = ramen.comment;
+}
 
-    ramenCard.innerHTML = `
-    <h2>${ramens.name}</h2>
-    <h3>${ramens.restaurant}</h3>
-    <img src="${ramens.image}" class="detail-image" />
-    <p>${ramens.rating}</p>
-    <p>${ramens.comment}</p>`;
+function newRamenHandler(e) {
+    e.preventDefault();
 
-    ramenElement.append(ramenCard);
+    const newRamen = {
+        name: e.target.name.value,
+        restaurant: e.target.restaurant.value,
+        image: e.target.image.value,
+        rating: e.target.rating.value,
+        comment: e.target['new-comment'].value,
     }
 
+    renderRamen(newRamen);
+    e.target.reset();
+}
 
-    function addNewRamen(event) {
-        event.preventDefault();
-        const name = event.target.name.value;
-        const restaurant = event.target.restaurant.value;
-        const image = event.target.image.value;
-        const rating = event.target.rating.value;
-        const comment = event.target.comment.value;
-
-        const body = JSON.stringify({
-            name, restaurant, image, rating, comment,
-        });
-
-        console.log(body);
-
-        fetch(ramenAPI, {
-            method: "POST",
-            headers, body
-        }).then(res => res.json())
-        .then(newRamen => {
-            ramenElement.push(newRamen);
-            renderRamens();
-        });
-    }
+function el(id) {
+    return document.getElementById(id);
+}
